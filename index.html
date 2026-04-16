@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Unis">
+<meta name="theme-color" content="#1a1a1a">
+<title>Unis & Minime</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:#f7f4f0;color:#1a1a1a;overscroll-behavior:none}
+input,button,select{font-family:'DM Sans',sans-serif}
+button:focus,input:focus{outline:none}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.md{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+@media(max-width:700px){
+  .ol{grid-template-columns:1fr!important}
+  .sp{position:static!important;top:auto!important}
+  .g3{grid-template-columns:1fr 1fr!important}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const _m={name:"Unis & Minime",short_name:"Unis",start_url:"./",display:"standalone",background_color:"#f7f4f0",theme_color:"#1a1a1a",icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231a1a1a'/%3E%3Ctext y='.85em' font-size='55' font-family='serif' x='12' fill='%23c19a6b'%3EU%26M%3C/text%3E%3C/svg%3E",sizes:"any",type:"image/svg+xml"}]};
+const _b=new Blob([JSON.stringify(_m)],{type:"application/json"});
+const _l=document.createElement("link");_l.rel="manifest";_l.href=URL.createObjectURL(_b);document.head.appendChild(_l);
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});`;
+  const sb=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(sb)).catch(()=>{});
+}
+</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+const PRODUCTS=[{"id":1,"name":"Remera Rachel Soft","category":"Remeras","colors":["Blanco","Chocolate","Negro","Crudo"],"sizes":["S","M","L","XL"],"listPrice":9000,"costPrice":4400},{"id":2,"name":"Remera Kendall","category":"Remeras","colors":["Blanco","Chocolate","Borravino","Negro","Camel"],"sizes":["S","M","L","XL"],"listPrice":11000,"costPrice":4900},{"id":3,"name":"Polera Louise","category":"Remeras","colors":["Blanco","Beige","Chocolate","Gris","Negro"],"sizes":["S","M","L"],"listPrice":9000,"costPrice":4290},{"id":4,"name":"Remera Vitu","category":"Remeras","colors":["Blanco","Beige","Camel","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":13000,"costPrice":6264},{"id":5,"name":"Remera Grace","category":"Remeras","colors":["Blanco","Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":9000,"costPrice":4315},{"id":6,"name":"Musculosa Cande Soft","category":"Remeras","colors":["Blanco","Chocolate","Borravino","Negro"],"sizes":["S","M","L","XL"],"listPrice":7000,"costPrice":3385},{"id":7,"name":"Remera Rachel","category":"Remeras","colors":["Blanco","Beige","Chocolate","Negro"],"sizes":["S","M","L","XL"],"listPrice":7500,"costPrice":3190},{"id":8,"name":"Remera Aventino","category":"Remeras","colors":[],"sizes":["S","M","L"],"listPrice":12500,"costPrice":5850},{"id":9,"name":"Musculosa Cande","category":"Remeras","colors":["Blanco","Chocolate","Negro"],"sizes":["XS","S","M","XL"],"listPrice":6000,"costPrice":2650},{"id":10,"name":"Remera Sia","category":"Remeras","colors":["Crudo","Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":12000,"costPrice":4930},{"id":11,"name":"Polera Aventino","category":"Remeras","colors":["Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":12500,"costPrice":5385},{"id":12,"name":"Remera Milu","category":"Remeras","colors":["Blanco","Chocolate","Beige","Negro"],"sizes":["S","M","L"],"listPrice":6500,"costPrice":2890},{"id":13,"name":"Polera Kubrick","category":"Remeras","colors":["Beige","Chocolate","Burgundy","Negro"],"sizes":["S","M","L"],"listPrice":8500,"costPrice":4060},{"id":14,"name":"Musculosa Ali","category":"Remeras","colors":["Off white","Camel","Chocolate","Negro"],"sizes":["XS","S","M","XL"],"listPrice":6000,"costPrice":2700},{"id":15,"name":"Musculosa Flora","category":"Remeras","colors":["Off white","Beige","Chocolate","Verde","Gris","Celeste","Negro"],"sizes":["S","M","L","XL","XXL"],"listPrice":7500,"costPrice":4650},{"id":16,"name":"Remera Kubrick","category":"Remeras","colors":["Chocolate"],"sizes":["S","M"],"listPrice":8000,"costPrice":3700},{"id":17,"name":"Remera Flame","category":"Remeras","colors":["Off white","Crudo","Chocolate","Gris topo","Negro"],"sizes":["S","M","L"],"listPrice":10500,"costPrice":5991},{"id":18,"name":"Remera Eve","category":"Remeras","colors":["Negro"],"sizes":["S","M","L"],"listPrice":8500,"costPrice":4650},{"id":19,"name":"Remera Vita","category":"Remeras","colors":["Camel","Negro","Crudo","Borravino","Choco claro","Choco osc"],"sizes":["S","M","L"],"listPrice":8500,"costPrice":4500},{"id":20,"name":"Remera Sienna","category":"Remeras","colors":["Chocolate"],"sizes":["M","L"],"listPrice":9500,"costPrice":6360},{"id":21,"name":"Remera Mirella","category":"Remeras","colors":["Blanco/chocolate","Blanco/gris","Blanco/negro"],"sizes":["S","M","L","XL"],"listPrice":10000,"costPrice":5466},{"id":22,"name":"Remera Roma","category":"Remeras","colors":["Off white","Beige","Chocolate","Verde","Gris","Celeste","Negro"],"sizes":["S","M","L","XL","XXL"],"listPrice":7500,"costPrice":4533},{"id":23,"name":"Remera Palm","category":"Remeras","colors":["Beige","Chocolate","Gris","Negro"],"sizes":["S","M","L"],"listPrice":5500,"costPrice":3130},{"id":24,"name":"Remera Cupido Comfy ML","category":"Remeras","colors":["Blanco","Beige","Visón","Gris topo","Negro"],"sizes":["S","M","L"],"listPrice":9000,"costPrice":4427},{"id":25,"name":"Remera Mora","category":"Remeras","colors":["Camel","Negro","Crudo","Borravino","Choco claro","Choco osc"],"sizes":["S","M","L"],"listPrice":8500,"costPrice":4650},{"id":26,"name":"Polera Monet","category":"Buzos / Sweaters","colors":["Beige","Camel","Visón","Negro"],"sizes":["S","M","L"],"listPrice":8500,"costPrice":3340},{"id":27,"name":"Sweater Tenerife","category":"Buzos / Sweaters","colors":["Blanco chocolate","Choco blanco","Blanco negro","Negro blanco"],"sizes":["Único"],"listPrice":20000,"costPrice":11500},{"id":28,"name":"Sweater Tenerife Liso","category":"Buzos / Sweaters","colors":["Blanco","Camel","Chocolate","Negro","Borravino"],"sizes":["Único"],"listPrice":20000,"costPrice":11500},{"id":29,"name":"Cardigan Amor","category":"Buzos / Sweaters","colors":["Negro","Beige"],"sizes":["S","M","L"],"listPrice":20000,"costPrice":11500},{"id":30,"name":"Sweater Olivia","category":"Buzos / Sweaters","colors":["Beige","Gris topo","Negro"],"sizes":["Único"],"listPrice":22000,"costPrice":12000},{"id":31,"name":"Sweater Serena","category":"Buzos / Sweaters","colors":["Fondo blanco","Fondo beige","Fondo negro"],"sizes":["Único"],"listPrice":21000,"costPrice":11500},{"id":32,"name":"Buzo Basic Friza","category":"Buzos / Sweaters","colors":["Crudo","Beige","Chocolate","Negro","Chocolate oscuro"],"sizes":["S","M","L"],"listPrice":18000,"costPrice":7905},{"id":33,"name":"Sweater Candela","category":"Buzos / Sweaters","colors":["Arena","Vino","Negro"],"sizes":["Único"],"listPrice":22000,"costPrice":11999},{"id":34,"name":"Sweater Detroit","category":"Buzos / Sweaters","colors":["Blanco","Beige","Camel"],"sizes":["S","M","L"],"listPrice":45000,"costPrice":26390},{"id":35,"name":"Sweater Polera New Jersey","category":"Buzos / Sweaters","colors":["Blanco","Beige","Chocolate"],"sizes":["S","M","L"],"listPrice":45000,"costPrice":26608},{"id":36,"name":"Sweater Chicago","category":"Buzos / Sweaters","colors":["Blanco","Beige","Nude","Chocolate"],"sizes":["S","M","L"],"listPrice":48000,"costPrice":28710},{"id":37,"name":"Sweater Atlanta","category":"Buzos / Sweaters","colors":["Blanco","Chocolate","Gris"],"sizes":["S","M","L"],"listPrice":46000,"costPrice":27550},{"id":38,"name":"Buzo Dina","category":"Buzos / Sweaters","colors":["Crudo","Beige","Chocolate","Negro"],"sizes":["M"],"listPrice":12500,"costPrice":5575},{"id":39,"name":"Buzo Summer","category":"Buzos / Sweaters","colors":["Crudo","Negro","Crudo/lineas choco"],"sizes":["S","M","L"],"listPrice":12500,"costPrice":4650},{"id":40,"name":"Sweater Campera Brooklyn","category":"Buzos / Sweaters","colors":["Crudo","Beige","Camel","Chocolate"],"sizes":["S","M","L"],"listPrice":47000,"costPrice":27840},{"id":41,"name":"Sweater Bifaz","category":"Buzos / Sweaters","colors":["Gris","Negro","Lanilla morley gris","Lanilla morley negro"],"sizes":["S","M","L"],"listPrice":21000,"costPrice":13867},{"id":42,"name":"Sweater Chomba Noa","category":"Buzos / Sweaters","colors":["Crudo/negro","Crudo/visón","Negro/blanco","Llama/crudo","Bordo/azul","Azul/blanco"],"sizes":["Único"],"listPrice":22500,"costPrice":13700},{"id":43,"name":"Buzo Aria","category":"Buzos / Sweaters","colors":["Crudo","Visón","Melange claro","Melange medio","Negro","Beige"],"sizes":["S","M","L","XL"],"listPrice":20000,"costPrice":11114},{"id":44,"name":"Buzo Abril","category":"Buzos / Sweaters","colors":["Crudo","Beige","Visón","Gris claro","Gris medio","Negro"],"sizes":["S","M","L","XL"],"listPrice":20000,"costPrice":16315},{"id":45,"name":"Cardigan Sol","category":"Buzos / Sweaters","colors":["Camel","Gris"],"sizes":["Único"],"listPrice":22000,"costPrice":16900},{"id":46,"name":"Polera Alessia","category":"Buzos / Sweaters","colors":["Crudo","Visón","Gris topo"],"sizes":["S","M","L"],"listPrice":24000,"costPrice":15000},{"id":47,"name":"Sweater Aitana","category":"Buzos / Sweaters","colors":["Gris melange","Beige","Negro","Blanco","Bordo"],"sizes":["Único"],"listPrice":22000,"costPrice":13680},{"id":48,"name":"Buzo Zoe","category":"Buzos / Sweaters","colors":["Blanco","Beige"],"sizes":["Único"],"listPrice":22000,"costPrice":9931},{"id":49,"name":"Sweater Kenia","category":"Buzos / Sweaters","colors":["Crudo","Gris melange","Beige","Bordo","Negro","Azul"],"sizes":["S","M","L"],"listPrice":23500,"costPrice":16800},{"id":50,"name":"Cardigan Thalia","category":"Buzos / Sweaters","colors":["Gris"],"sizes":["Único"],"listPrice":25500,"costPrice":15900},{"id":51,"name":"Polera Bifaz","category":"Buzos / Sweaters","colors":["Beige","Chocolate","Gris","Negro"],"sizes":["S","M","L"],"listPrice":21000,"costPrice":10262},{"id":52,"name":"Jogging Basic Friza","category":"Buzos / Sweaters","colors":["Crudo","Beige","Chocolate","Chocolate oscuro","Negro"],"sizes":["S","M","L"],"listPrice":25000,"costPrice":10162},{"id":53,"name":"Blusa Linda","category":"Camisas / Blusas","colors":["Crudo","Visón","Negro"],"sizes":["S","M","L"],"listPrice":18000,"costPrice":8200},{"id":54,"name":"Camisa Annie","category":"Camisas / Blusas","colors":["Off white","Bordo"],"sizes":["M","L"],"listPrice":17000,"costPrice":9788},{"id":55,"name":"Blusa Kris","category":"Camisas / Blusas","colors":["Crudo"],"sizes":["S","M","L"],"listPrice":15000,"costPrice":7320},{"id":56,"name":"Camisa Gretel","category":"Camisas / Blusas","colors":["Gris claro"],"sizes":["M"],"listPrice":18000,"costPrice":12763},{"id":57,"name":"Camisa Travis","category":"Camisas / Blusas","colors":["Crudo","Visón","Negro"],"sizes":["S","M","L"],"listPrice":20000,"costPrice":8980},{"id":58,"name":"Blazer Sienna","category":"Chalecos / Blazers / Tapados","colors":["Negro","Beige","Chocolate"],"sizes":["S","M","L"],"listPrice":26000,"costPrice":12440},{"id":59,"name":"Chaleco Cloe","category":"Chalecos / Blazers / Tapados","colors":["Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":27000,"costPrice":12974},{"id":60,"name":"Chaleco Willard","category":"Chalecos / Blazers / Tapados","colors":["Gris","Camel","Negro"],"sizes":["M","L"],"listPrice":30000,"costPrice":19012},{"id":61,"name":"Saco Manny","category":"Chalecos / Blazers / Tapados","colors":["Beige","Camel","Visón","Negro"],"sizes":["S","M","L"],"listPrice":50000,"costPrice":32140},{"id":62,"name":"Campera Willard","category":"Chalecos / Blazers / Tapados","colors":["Gris","Camel","Negro"],"sizes":["S","M","L"],"listPrice":43500,"costPrice":27411},{"id":63,"name":"Trench Octavie","category":"Chalecos / Blazers / Tapados","colors":["Camel","Azul navy","Negro"],"sizes":["1","3"],"listPrice":25000,"costPrice":17000},{"id":64,"name":"Blazer Hana","category":"Chalecos / Blazers / Tapados","colors":["Verde","Chocolate","Beige"],"sizes":["M","L"],"listPrice":35000,"costPrice":31658},{"id":65,"name":"Chaqueta Briana","category":"Chalecos / Blazers / Tapados","colors":["Camel","Negro brilloso"],"sizes":["S","M","L"],"listPrice":26000,"costPrice":13700},{"id":66,"name":"Chaleco Queen","category":"Chalecos / Blazers / Tapados","colors":["Bordo","Gris melange"],"sizes":["M"],"listPrice":20000,"costPrice":13194},{"id":67,"name":"Chaleco Maia","category":"Chalecos / Blazers / Tapados","colors":["Camel","Gris topo"],"sizes":["S","M","L"],"listPrice":12000,"costPrice":8484},{"id":68,"name":"Falda Akita","category":"Vestidos / Faldas","colors":["Negro","Chocolate","Borravino"],"sizes":["S","M","L"],"listPrice":24500,"costPrice":12440},{"id":69,"name":"Vestido Roma","category":"Vestidos / Faldas","colors":["Beige","Blanco","Negro","Gris"],"sizes":["S","M","L"],"listPrice":19500,"costPrice":10705},{"id":70,"name":"Pantalón Eclipse","category":"Pantalones / Joggers","colors":["Negro","Chocolate","Visón","Natural"],"sizes":["S","M","L"],"listPrice":25000,"costPrice":12480},{"id":71,"name":"Pantalón Strech","category":"Pantalones / Joggers","colors":["Beige","Gris","Celeste"],"sizes":["S","M","L"],"listPrice":15000,"costPrice":8810},{"id":72,"name":"Pantalón Vitu","category":"Pantalones / Joggers","colors":["Blanco","Crudo","Beige","Negro","Chocolate"],"sizes":["S","M","L"],"listPrice":15000,"costPrice":7064},{"id":73,"name":"Pantalón Baku","category":"Pantalones / Joggers","colors":["Off white","Visón","Negro","Chocolate"],"sizes":["38","40","42","44","46"],"listPrice":26000,"costPrice":11400},{"id":74,"name":"Pantalón Louise","category":"Pantalones / Joggers","colors":["Blanco","Beige","Chocolate","Gris","Negro"],"sizes":["S","M","L"],"listPrice":15000,"costPrice":7154},{"id":75,"name":"Jean Classic 447","category":"Pantalones / Joggers","colors":["Jean claro","Jean oscuro"],"sizes":["36","38","40","42","44","46"],"listPrice":26000,"costPrice":12870},{"id":76,"name":"Pantalón Classic 447","category":"Pantalones / Joggers","colors":["Off white","Visón","Negro"],"sizes":["36","40","44","46"],"listPrice":24000,"costPrice":10206},{"id":77,"name":"Pantalón Bono","category":"Pantalones / Joggers","colors":["Crudo","Negro"],"sizes":["S","M","L"],"listPrice":13500,"costPrice":7585},{"id":78,"name":"Pantalón Sia","category":"Pantalones / Joggers","colors":["Beige","Chocolate","Negro"],"sizes":["M"],"listPrice":19000,"costPrice":9233},{"id":79,"name":"Pantalón Victoria","category":"Pantalones / Joggers","colors":["Beige","Camel","Chocolate","Choco oscuro","Negro"],"sizes":["S","M","L"],"listPrice":22000,"costPrice":9870},{"id":80,"name":"Pantalón Vintage","category":"Pantalones / Joggers","colors":["Off white","Beige","Gris","Tostado","Bordo","Negro"],"sizes":["XS","S","M","L"],"listPrice":16500,"costPrice":6851},{"id":81,"name":"Pantalón Sienna","category":"Pantalones / Joggers","colors":["Gris claro","Gris oscuro","Chocolate","Negro"],"sizes":["S","M"],"listPrice":16000,"costPrice":10741},{"id":82,"name":"Pantalón Flame","category":"Pantalones / Joggers","colors":["Crudo","Chocolate","Gris topo","Negro"],"sizes":["S","M","L"],"listPrice":17000,"costPrice":10537},{"id":83,"name":"Pantalón Savage","category":"Pantalones / Joggers","colors":["Reptil"],"sizes":["S","M"],"listPrice":20000,"costPrice":10868},{"id":84,"name":"Pantalón Hana","category":"Pantalones / Joggers","colors":["Verde","Chocolate","Beige"],"sizes":["S","M","L"],"listPrice":20000,"costPrice":15600},{"id":85,"name":"Pantalón Briana","category":"Pantalones / Joggers","colors":["Beige","Camel","Choco","Negro opaco","Negro brilloso"],"sizes":["M","L","S"],"listPrice":17000,"costPrice":11218},{"id":86,"name":"Pantalón Kiara","category":"Pantalones / Joggers","colors":["Beige","Gris","Bordo","Negro"],"sizes":["S","M","L"],"listPrice":24300,"costPrice":13516},{"id":87,"name":"Pantalón Maia","category":"Pantalones / Joggers","colors":["Camel","Gris topo"],"sizes":["M","L","S"],"listPrice":20000,"costPrice":12913},{"id":88,"name":"Pantalón Barcelona","category":"Pantalones / Joggers","colors":["Beige"],"sizes":["M","L","XL"],"listPrice":20000,"costPrice":12103},{"id":89,"name":"Jogging Ronie","category":"Pantalones / Joggers","colors":["Crudo","Beige","Melange claro","Melange medio","Negro"],"sizes":["S","M","L","XL"],"listPrice":20000,"costPrice":15355},{"id":90,"name":"Jogging Aurora","category":"Pantalones / Joggers","colors":["Crudo","Melange claro"],"sizes":["M","L","XL"],"listPrice":20000,"costPrice":15114},{"id":91,"name":"Pantalón Cupido Comfy","category":"Pantalones / Joggers","colors":["Crudo","Beige","Visón","Gris topo"],"sizes":["S","M","L"],"listPrice":12500,"costPrice":8011},{"id":92,"name":"Pantalon Classic","category":"Pantalones / Joggers","colors":["Off white","Visón","Negro","Chocolate"],"sizes":["36","38","40","42","44","46","48"],"listPrice":24000,"costPrice":10811,"preorder":true},{"id":93,"name":"Jogging Dina","category":"Pantalones / Joggers","colors":["Off white","Beige","Visón","Negro","Chocolate"],"sizes":["S","M","L"],"listPrice":15000,"costPrice":7316,"preorder":true},{"id":94,"name":"Buzo Gala","category":"Buzos / Sweaters","colors":["Off white","Beige","Visón","Negro","Chocolate"],"sizes":["S","M","L"],"listPrice":14000,"costPrice":7382,"preorder":true},{"id":95,"name":"Chaqueta Border","category":"Chalecos / Blazers / Tapados","colors":["Negro","Beige","Chocolate"],"sizes":["S","M","L"],"listPrice":27000,"costPrice":13500,"preorder":true},{"id":96,"name":"Body Clair","category":"Remeras","colors":["Blanco","Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":10000,"costPrice":4975,"preorder":true},{"id":97,"name":"Body Serena","category":"Remeras","colors":["Blanco","Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":10000,"costPrice":4975,"preorder":true},{"id":98,"name":"Remera Cruzada","category":"Remeras","colors":["Blanco","Beige","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":9500,"costPrice":4650,"preorder":true},{"id":99,"name":"Pantalon Baku Repo","category":"Pantalones / Joggers","colors":["Off white","Visón","Negro","Chocolate"],"sizes":["36","38","40","42","44","46","48"],"listPrice":25000,"costPrice":11500,"preorder":true},{"id":100,"name":"Tapado Selene","category":"Chalecos / Blazers / Tapados","colors":["Crudo","Camel","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":32000,"costPrice":13757,"preorder":true},{"id":101,"name":"Blazer Sienna","category":"Chalecos / Blazers / Tapados","colors":["Crudo","Camel","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":26000,"costPrice":13085,"preorder":true},{"id":102,"name":"Camisa Lana","category":"Camisas / Blusas","colors":["Blanco","Celeste","Rosa","Chocolate"],"sizes":["S","M","L"],"listPrice":18000,"costPrice":8400,"preorder":true},{"id":103,"name":"Camisa Amor","category":"Camisas / Blusas","colors":["Blanco","Celeste","Rosa","Chocolate"],"sizes":["S","M","L"],"listPrice":20000,"costPrice":9700,"preorder":true},{"id":104,"name":"Camisa Princess","category":"Camisas / Blusas","colors":["Blanco","Celeste","Rosa","Chocolate"],"sizes":["S","M","L"],"listPrice":18000,"costPrice":8400,"preorder":true},{"id":105,"name":"Remera Puntilla","category":"Remeras","colors":["Crudo","Vison","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":13500,"costPrice":6300,"preorder":true},{"id":106,"name":"Remera Milu Comfy","category":"Remeras","colors":["Crudo","Vison","Chocolate","Negro"],"sizes":["S","M","L"],"listPrice":7500,"costPrice":3200,"preorder":true},{"id":107,"name":"Pantalon Baku Denim Desflecado","category":"Pantalones / Joggers","colors":["Azul","Gris"],"sizes":["36","38","40","42","44","46","48"],"listPrice":28000,"costPrice":14250,"preorder":true},{"id":108,"name":"Patalon Baku Denim Sin Desflecar","category":"Pantalones / Joggers","colors":["Azul","Negro"],"sizes":["36","38","40","42","44","46","48"],"listPrice":28000,"costPrice":14250,"preorder":true},{"id":109,"name":"Chaqueta Gabi","category":"Chalecos / Blazers / Tapados","colors":["Crudo","Camel","Chocolate","Gris","Negro"],"sizes":["S","M","L"],"listPrice":30000,"costPrice":16000,"preorder":true},{"id":110,"name":"Sweater Encaje","category":"Buzos / Sweaters","colors":["Off White","Chocolate","Negro"],"sizes":["M","L"],"listPrice":32000,"costPrice":17000,"preorder":true}];
+
+const DFLT_USERS=[
+  {id:"ivan",   name:"IVAN",   username:"ivan",   password:"ivan2024",   role:"admin"},
+  {id:"gaby",   name:"GABY",   username:"gaby",   password:"gaby2024",   role:"encargada"},
+  {id:"sandra", name:"SANDRA", username:"sandra", password:"sandra2024", role:"vendedora_full"},
+  {id:"milu",   name:"MILU",   username:"milu",   password:"milu2024",   role:"vendedora"},
+  {id:"karen",  name:"KAREN",  username:"karen",  password:"karen2024",  role:"vendedora"},
+];
+
+const ROLE_COLOR={admin:"#c19a6b",encargada:"#6b4fa0",vendedora_full:"#2d7a4f",vendedora:"#3a8abf"};
+const ROLE_LABEL={admin:"Admin",encargada:"Encargada",vendedora_full:"Vendedora",vendedora:"Vendedora"};
+const canSeeAll    =r=>["admin","encargada","vendedora_full"].includes(r);
+const canEditAll   =r=>["admin","encargada"].includes(r);
+const canEditCat   =r=>["admin","encargada"].includes(r);
+const canManageUsers=r=>r==="admin";
+
+const COLOR_HEX={
+  "Negro":"#1a1a1a","Blanco":"#e8e4de","Beige":"#d4b896","Crudo":"#e8dcc8",
+  "Camel":"#c19a6b","Chocolate":"#5c3317","Borravino":"#6b1a2a","Bordo":"#7b1c2c",
+  "Visón":"#b8a99a","Vison":"#b8a99a","Gris":"#9e9e9e","Gris topo":"#8b8480",
+  "Natural":"#d6c9b8","Choco osc":"#3d1f0d","Choco claro":"#8b5e3c",
+  "Chocolate oscuro":"#3d1f0d","Fondo blanco":"#e8e4de","Fondo beige":"#d4b896",
+  "Fondo negro":"#1a1a1a","Verde":"#4a7c59","Azul":"#1e3a5f","Celeste":"#87ceeb",
+  "Off white":"#f0ebe2","Off White":"#f0ebe2","Arena":"#d9c9a0","Vino":"#6b1a2a",
+  "Burgundy":"#6b1a2a","Nude":"#c9a882","Gris melange":"#a0998f",
+  "Melange claro":"#c8c0b4","Melange medio":"#8b8480","Gris claro":"#c8c0b4",
+  "Gris medio":"#8b8480","Gris oscuro":"#555","Gris perla":"#d8d0c8",
+  "Jean claro":"#7eb5d6","Jean oscuro":"#2d5a7e","Tostado":"#b8834a",
+  "Reptil":"#6b7a4a","Negro brilloso":"#222","Negro opaco":"#333",
+  "Azul navy":"#1e3a5f","Rosa":"#f4a7b9","Blanco/chocolate":"#e8e4de",
+  "Blanco/gris":"#e8e4de","Blanco/negro":"#e8e4de","Crudo/negro":"#e8dcc8",
+  "Crudo/visón":"#e8dcc8","Llama/crudo":"#c8b89a","Bordo/azul":"#7b1c2c",
+  "Azul/blanco":"#1e3a5f","Blanco chocolate":"#e8dcc8","Choco blanco":"#5c3317",
+  "Negro/blanco":"#1a1a1a","Lanilla morley gris":"#9e9e9e",
+  "Lanilla morley negro":"#1a1a1a","Crudo/lineas choco":"#e8dcc8","Choco":"#5c3317",
+};
+
+const fmt=n=>new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n||0);
+const fmtD=d=>{try{return new Date(d+"T12:00").toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short"});}catch{return d;}};
+const lsGet=(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+async function stGet(key){
+  try{const r=await window.storage.get(key,true);return r?JSON.parse(r.value):null;}
+  catch{return lsGet(key,null);}
+}
+async function stSet(key,val){
+  const s=JSON.stringify(val);
+  try{await window.storage.set(key,s,true);}catch{}
+  lsSet(key,s);
+}
+
+function effPrice(pid,prices,prods,mult){
+  if(prices&&prices[pid]!=null)return Number(prices[pid]);
+  const p=prods.find(x=>x.id===pid);
+  return p?p.listPrice*mult:0;
+}
+function orderTotal(order,prods,mult){
+  return Object.entries(order.grid||{}).reduce((s,[key,qty])=>{
+    const pid=Number(key.split("|")[0]);
+    return s+effPrice(pid,order.prices||{},prods,mult)*qty;
+  },0);
+}
+function orderUnits(order){return Object.values(order.grid||{}).reduce((s,v)=>s+v,0);}
+
+// ── APP ROOT ──────────────────────────────────────────────────────
+function App(){
+  const [user,setUser]=useState(()=>lsGet("unis_sess",null));
+  const [users,setUsers]=useState(()=>lsGet("unis_users",DFLT_USERS));
+  const [orders,setOrdersState]=useState([]);
+  const [prods,setProdsState]=useState(()=>lsGet("unis_prods",PRODUCTS));
+  const [appts,setApptsState]=useState(()=>lsGet("unis_appts",[]));
+  const [mult,setMultState]=useState(()=>lsGet("unis_mult",1));
+  const [syncing,setSyncing]=useState(false);
+  const [lastSync,setLastSync]=useState(null);
+
+  useEffect(()=>{
+    stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);});
+    stGet("unis_users_v3").then(u=>{if(u){setUsers(u);lsSet("unis_users",u);}});
+    stGet("unis_prods_v3").then(p=>{if(p){setProdsState(p);lsSet("unis_prods",p);}});
+  },[]);
+
+  useEffect(()=>{
+    const iv=setInterval(async()=>{
+      const o=await stGet("unis_orders_v3");
+      if(o){setOrdersState(o);setLastSync(new Date());}
+    },8000);
+    return()=>clearInterval(iv);
+  },[]);
+
+  const saveOrders=useCallback((fn)=>{
+    setOrdersState(prev=>{
+      const next=typeof fn==="function"?fn(prev):fn;
+      setSyncing(true);
+      stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());});
+      return next;
+    });
+  },[]);
+
+  const saveUsers=useCallback((fn)=>{
+    setUsers(prev=>{
+      const next=typeof fn==="function"?fn(prev):fn;
+      lsSet("unis_users",next);
+      stSet("unis_users_v3",next);
+      return next;
+    });
+  },[]);
+
+  const saveProds=useCallback((fn)=>{
+    setProdsState(prev=>{
+      const next=typeof fn==="function"?fn(prev):fn;
+      lsSet("unis_prods",next);
+      stSet("unis_prods_v3",next);
+      return next;
+    });
+  },[]);
+
+  const saveAppts=useCallback((fn)=>{
+    setApptsState(prev=>{
+      const next=typeof fn==="function"?fn(prev):fn;
+      lsSet("unis_appts",next);
+      return next;
+    });
+  },[]);
+
+  const setMult=useCallback((v)=>{setMultState(v);lsSet("unis_mult",v);},[]);
+
+  const login=(u)=>{setUser(u);lsSet("unis_sess",u);};
+  const logout=()=>{setUser(null);lsSet("unis_sess",null);};
+
+  if(!user)return<Login users={users} onLogin={login}/>;
+
+  return<Main user={user} users={users} orders={orders} prods={prods} appts={appts} mult={mult}
+    saveOrders={saveOrders} saveUsers={saveUsers} saveProds={saveProds} saveAppts={saveAppts}
+    setMult={setMult} syncing={syncing} lastSync={lastSync} onLogout={logout}/>;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────
+function Login({users,onLogin}){
+  const [uname,setUname]=useState("");
+  const [pass,setPass]=useState("");
+  const [err,setErr]=useState("");
+  const [show,setShow]=useState(false);
+  const submit=()=>{
+    const found=users.find(u=>u.username.toLowerCase()===uname.trim().toLowerCase()&&u.password===pass.trim());
+    if(found){onLogin(found);setErr("");}
+    else setErr("Usuario o contraseña incorrectos");
+  };
+  return(
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#1a1a1a",padding:16}}>
+      <div style={{background:"#f7f4f0",borderRadius:20,padding:36,maxWidth:380,width:"100%",boxShadow:"0 24px 80px rgba(0,0,0,.4)"}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:30,fontWeight:700}}>Unis & Minime</div>
+          <div style={{fontSize:12,color:"#888",marginTop:6}}>Sistema de ventas</div>
+        </div>
+        <Fld label="USUARIO" val={uname} set={setUname} ph="Tu usuario" onEnter={submit}/>
+        <div style={{marginBottom:20}}>
+          <label style={{fontSize:12,fontWeight:700,color:"#666",display:"block",marginBottom:4,letterSpacing:.5}}>CONTRASEÑA</label>
+          <div style={{position:"relative"}}>
+            <input type={show?"text":"password"} value={pass} onChange={e=>setPass(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="••••••••"
+              style={{width:"100%",padding:"12px 44px 12px 14px",border:"2px solid #e0dcd6",borderRadius:10,fontSize:15,boxSizing:"border-box"}}/>
+            <button onClick={()=>setShow(v=>!v)} style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",fontSize:18,color:"#888"}}>{show?"🙈":"👁"}</button>
+          </div>
+        </div>
+        {err&&<div style={{background:"#fee",color:"#c00",padding:"10px 14px",borderRadius:8,fontSize:13,marginBottom:14,fontWeight:600}}>⚠️ {err}</div>}
+        <button onClick={submit} style={{width:"100%",padding:14,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,fontSize:16,fontWeight:700,cursor:"pointer"}}>Ingresar →</button>
+        <div style={{marginTop:18,padding:"12px 14px",background:"#f0ede8",borderRadius:10,fontSize:11,color:"#999",lineHeight:1.7}}>
+          <strong style={{color:"#666"}}>Usuarios:</strong> ivan · gaby · sandra · milu · karen
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN LAYOUT ───────────────────────────────────────────────────
+function Main({user,users,orders,prods,appts,mult,saveOrders,saveUsers,saveProds,saveAppts,setMult,syncing,lastSync,onLogout}){
+  const [tab,setTab]=useState("pedidos");
+  const tabs=useMemo(()=>{
+    const t=[{id:"pedidos",label:"🛍 Pedidos"},{id:"agenda",label:"📅 Agenda"},{id:"catalogo",label:"👗 Catálogo"}];
+    if(canManageUsers(user.role))t.push({id:"usuarios",label:"👥 Usuarios"});
+    return t;
+  },[user.role]);
+  return(
+    <div style={{background:"#f7f4f0",minHeight:"100vh"}}>
+      <header style={{background:"#1a1a1a",color:"#f7f4f0",padding:"0 14px",position:"sticky",top:0,zIndex:50,boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}>
+        <div style={{maxWidth:1020,margin:"0 auto"}}>
+          <div style={{padding:"12px 0 0",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <span style={{fontFamily:"'Playfair Display',serif",fontSize:18,fontWeight:700}}>Unis & Minime</span>
+              <span style={{fontSize:10,background:ROLE_COLOR[user.role],color:"#fff",padding:"2px 8px",borderRadius:20,fontWeight:700}}>{user.name}</span>
+              {syncing&&<span style={{fontSize:10,color:"#c19a6b"}}>↑ guardando…</span>}
+              {lastSync&&!syncing&&<span style={{fontSize:9,color:"#555"}}>✓ {lastSync.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</span>}
+            </div>
+            <button onClick={onLogout} style={{fontSize:11,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:6,padding:"4px 10px",cursor:"pointer"}}>Salir</button>
+          </div>
+          <nav style={{display:"flex",gap:1,marginTop:10,overflowX:"auto",scrollbarWidth:"none"}}>
+            {tabs.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{background:tab===t.id?"#f7f4f0":"transparent",color:tab===t.id?"#1a1a1a":"#a0998f",border:"none",padding:"9px 16px",fontSize:13,fontWeight:600,borderRadius:"8px 8px 0 0",cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{t.label}</button>
+            ))}
+          </nav>
+        </div>
+      </header>
+      <main style={{maxWidth:1020,margin:"0 auto",padding:"20px 12px 80px"}}>
+        {tab==="pedidos"  &&<Orders  user={user} orders={orders} saveOrders={saveOrders} prods={prods} mult={mult}/>}
+        {tab==="agenda"   &&<Agenda  user={user} appts={appts}   saveAppts={saveAppts}/>}
+        {tab==="catalogo" &&<Catalog user={user} prods={prods}   saveProds={saveProds}  mult={mult} setMult={setMult}/>}
+        {tab==="usuarios" &&<UserMgmt user={user} users={users}  saveUsers={saveUsers}/>}
+      </main>
+    </div>
+  );
+}
+
+// ── ORDERS LIST ───────────────────────────────────────────────────
+function Orders({user,orders,saveOrders,prods,mult}){
+  const [view,setView]=useState("list");
+  const [current,setCurrent]=useState(null);
+  const [search,setSearch]=useState("");
+  const [filterStatus,setFilterStatus]=useState("todos");
+
+  const myOrders=useMemo(()=>canSeeAll(user.role)?orders:orders.filter(o=>o.userId===user.id),[orders,user]);
+  const filtered=useMemo(()=>myOrders
+    .filter(o=>filterStatus==="todos"||o.status===filterStatus)
+    .filter(o=>!search||o.clientName?.toLowerCase().includes(search.toLowerCase())||o.trip?.toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
+  ,[myOrders,filterStatus,search]);
+
+  const totalVenta=useMemo(()=>myOrders.reduce((s,o)=>s+orderTotal(o,prods,mult),0),[myOrders,prods,mult]);
+  const pendiente=useMemo(()=>myOrders.filter(o=>o.status!=="entregado").reduce((s,o)=>s+orderTotal(o,prods,mult),0),[myOrders,prods,mult]);
+
+  const openNew=()=>{
+    setCurrent({id:Date.now(),userId:user.id,userName:user.name,clientName:"",date:new Date().toISOString().split("T")[0],trip:"",status:"borrador",grid:{},prices:{},extraColors:{},extraSizes:{},createdAt:Date.now()});
+    setView("form");
+  };
+  const openEdit=o=>{
+    if(!canEditAll(user.role)&&o.userId!==user.id)return;
+    setCurrent(JSON.parse(JSON.stringify(o)));setView("form");
+  };
+  const saveOrder=o=>{saveOrders(prev=>{const i=prev.findIndex(x=>x.id===o.id);return i>=0?prev.map(x=>x.id===o.id?o:x):[...prev,o];});setView("list");};
+  const delOrder=id=>saveOrders(prev=>prev.filter(o=>o.id!==id));
+
+  if(view==="form")return<OrderForm order={current} prods={prods} mult={mult} user={user} onSave={saveOrder} onCancel={()=>setView("list")}/>;
+
+  return(
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700}}>Pedidos</h2>
+        <Btn primary onClick={openNew}>+ Nuevo</Btn>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}} className="g3">
+        <SCard label="Total ventas" val={fmt(totalVenta)}/>
+        <SCard label="Por cobrar"   val={fmt(pendiente)} dark/>
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:12,flexWrap:"wrap"}}>
+        {["todos","borrador","confirmado","entregado"].map(s=>(
+          <button key={s} onClick={()=>setFilterStatus(s)} style={{padding:"5px 12px",borderRadius:20,border:filterStatus===s?"none":"1px solid #ddd",background:filterStatus===s?"#1a1a1a":"#fff",color:filterStatus===s?"#fff":"#555",fontSize:11,cursor:"pointer",fontWeight:600,textTransform:"capitalize"}}>{s}</button>
+        ))}
+      </div>
+      <input placeholder="🔍 Buscar cliente o viaje…" value={search} onChange={e=>setSearch(e.target.value)}
+        style={{width:"100%",padding:"10px 14px",border:"1px solid #ddd",borderRadius:8,fontSize:14,marginBottom:14,boxSizing:"border-box"}}/>
+      {filtered.length===0&&<Empty icon="🛍" text="No hay pedidos"/>}
+      {filtered.map(o=>{
+        const total=orderTotal(o,prods,mult);
+        const units=orderUnits(o);
+        const canEdit=canEditAll(user.role)||o.userId===user.id;
+        const bl=o.status==="entregado"?"#ccc":o.status==="confirmado"?"#2d7a4f":"#c19a6b";
+        return(
+          <div key={o.id} style={{background:"#fff",borderRadius:12,padding:"14px 16px",marginBottom:10,boxShadow:"0 1px 3px rgba(0,0,0,.07)",cursor:canEdit?"pointer":"default",borderLeft:`4px solid ${bl}`}}
+            onClick={()=>canEdit&&openEdit(o)}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",alignItems:"center",gap:7,flexWrap:"wrap"}}>
+                  <span style={{fontWeight:700,fontSize:15}}>{o.clientName||"Sin cliente"}</span>
+                  {canSeeAll(user.role)&&<span style={{fontSize:11,color:"#aaa"}}>({o.userName})</span>}
+                </div>
+                <div style={{fontSize:12,color:"#888",marginTop:3}}>{fmtD(o.date)} · {units} prenda{units!==1?"s":""}{o.trip?` · ${o.trip}`:""}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontWeight:700,fontSize:16}}>{fmt(total)}</div>
+                  <SBadge status={o.status}/>
+                </div>
+                {canEdit&&<IBtn onClick={e=>{e.stopPropagation();if(confirm("¿Eliminar?"))delOrder(o.id);}}>🗑</IBtn>}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── ORDER FORM ────────────────────────────────────────────────────
+function OrderForm({order,prods,mult,user,onSave,onCancel}){
+  const [o,setO]=useState(()=>JSON.parse(JSON.stringify(order)));
+  const [catFilter,setCatFilter]=useState("Todos");
+  const [search,setSearch]=useState("");
+  const [showCost,setShowCost]=useState(false);
+  const [varModal,setVarModal]=useState(null);
+  const [extraColors,setExtraColors]=useState(()=>order.extraColors||{});
+  const [extraSizes, setExtraSizes ]=useState(()=>order.extraSizes ||{});
+
+  const getColors=useCallback(pid=>{
+    const p=prods.find(x=>x.id===pid);
+    return[...new Set([...(p?p.colors:[]),...(extraColors[pid]||[])])];
+  },[prods,extraColors]);
+  const getSizes=useCallback(pid=>{
+    const p=prods.find(x=>x.id===pid);
+    return[...new Set([...(p?p.sizes:[]),...(extraSizes[pid]||[])])];
+  },[prods,extraSizes]);
+
+  const addVariant=(pid,color,size)=>{
+    if(color)setExtraColors(prev=>({...prev,[pid]:[...(prev[pid]||[]),color].filter((v,i,a)=>a.indexOf(v)===i)}));
+    if(size) setExtraSizes (prev=>({...prev,[pid]:[...(prev[pid]||[]),size ].filter((v,i,a)=>a.indexOf(v)===i)}));
+    setVarModal(null);
+  };
+
+  const setQty=(pid,color,size,qty)=>{
+    const key=`${pid}|${color}|${size}`;
+    setO(prev=>{const g={...prev.grid};if(qty<=0)delete g[key];else g[key]=qty;return{...prev,grid:g};});
+  };
+  const getQty=(pid,color,size)=>o.grid[`${pid}|${color}|${size}`]||0;
+  const setPrice=(pid,val)=>setO(prev=>({...prev,prices:{...prev.prices,[pid]:val===""?undefined:Number(val)}}));
+  const getPrice=useCallback(pid=>effPrice(pid,o.prices,prods,mult),[o.prices,prods,mult]);
+
+  const total=useMemo(()=>Object.entries(o.grid||{}).reduce((s,[key,qty])=>{
+    const pid=Number(key.split("|")[0]);return s+getPrice(pid)*qty;},0),[o.grid,getPrice]);
+  const units=orderUnits(o);
+
+  const categories=useMemo(()=>["Todos",...Array.from(new Set(prods.map(p=>p.category)))]  ,[prods]);
+  const visible=useMemo(()=>prods.filter(p=>{
+    if(catFilter==="__pre__")return p.preorder&&(!search||p.name.toLowerCase().includes(search.toLowerCase()));
+    return(catFilter==="Todos"||p.category===catFilter)&&(!search||p.name.toLowerCase().includes(search.toLowerCase()));
+  }),[prods,catFilter,search]);
+
+  const summary=useMemo(()=>{
+    const byProd={};
+    prods.forEach(p=>{
+      const cols=getColors(p.id);const szs=getSizes(p.id);
+      const ac=cols.length>0?cols:[""];
+      ac.forEach(c=>szs.forEach(s=>{
+        const q=getQty(p.id,c,s);
+        if(q>0){
+          if(!byProd[p.id])byProd[p.id]={name:p.name,rows:[],total:0};
+          byProd[p.id].rows.push({c,s,q});
+          byProd[p.id].total+=getPrice(p.id)*q;
+        }
+      }));
+    });
+    return Object.values(byProd);
+  },[o.grid,extraColors,extraSizes,getPrice,getColors,getSizes,prods]);
+
+  return(
+    <div>
+      {varModal&&<VariantModal pid={varModal} prodName={prods.find(p=>p.id===varModal)?.name} onAdd={addVariant} onClose={()=>setVarModal(null)}/>}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+        <button onClick={onCancel} style={{background:"none",border:"none",cursor:"pointer",fontSize:22,color:"#555",lineHeight:1,padding:"4px"}}>←</button>
+        <h2 style={{margin:0,fontFamily:"'Playfair Display',serif",fontSize:22,fontWeight:700}}>{o.clientName?`Pedido — ${o.clientName}`:"Nuevo Pedido"}</h2>
+      </div>
+
+      <div style={{background:"#fff",borderRadius:12,padding:"14px 16px",marginBottom:16,boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}} className="g3">
+          <Fld label="Cliente"    val={o.clientName}  set={v=>setO(p=>({...p,clientName:v}))}  ph="Nombre del cliente"/>
+          <Fld label="Fecha"      type="date" val={o.date} set={v=>setO(p=>({...p,date:v}))}/>
+          <Fld label="Viaje/Ruta" val={o.trip||""}    set={v=>setO(p=>({...p,trip:v}))}         ph="Ej: Córdoba Mayo"/>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          <span style={{fontSize:12,fontWeight:600,color:"#666"}}>Estado:</span>
+          {["borrador","confirmado","entregado"].map(s=>(
+            <button key={s} onClick={()=>setO(p=>({...p,status:s}))} style={{padding:"4px 13px",borderRadius:20,border:"none",cursor:"pointer",fontSize:12,fontWeight:600,background:o.status===s?"#1a1a1a":"#ece9e4",color:o.status===s?"#fff":"#555"}}>{s.charAt(0).toUpperCase()+s.slice(1)}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 290px",gap:16,alignItems:"start"}} className="ol">
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,gap:8,flexWrap:"wrap"}}>
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+              {categories.map(c=>(
+                <button key={c} onClick={()=>setCatFilter(c)} style={{padding:"4px 10px",borderRadius:20,border:catFilter===c?"none":"1px solid #ddd",background:catFilter===c?"#1a1a1a":"#fff",color:catFilter===c?"#fff":"#555",fontSize:11,cursor:"pointer",fontWeight:600}}>{c}</button>
+              ))}
+              <button onClick={()=>setCatFilter("__pre__")} style={{padding:"4px 10px",borderRadius:20,border:catFilter==="__pre__"?"none":"1px solid #3355aa",background:catFilter==="__pre__"?"#3355aa":"#fff",color:catFilter==="__pre__"?"#fff":"#3355aa",fontSize:11,cursor:"pointer",fontWeight:700}}>📦 Por ingresar</button>
+            </div>
+            {canEditCat(user.role)&&(
+              <button onClick={()=>setShowCost(v=>!v)} style={{padding:"5px 11px",borderRadius:20,border:"none",cursor:"pointer",background:showCost?"#2d7a4f":"#ece9e4",color:showCost?"#fff":"#555",fontSize:11,fontWeight:700,flexShrink:0}}>
+                💰 {showCost?"Viendo costo":"Ver costo"}
+              </button>
+            )}
+          </div>
+          <input placeholder="🔍 Buscar artículo…" value={search} onChange={e=>setSearch(e.target.value)}
+            style={{width:"100%",padding:"8px 12px",border:"1px solid #ddd",borderRadius:8,fontSize:13,marginBottom:10,boxSizing:"border-box"}}/>
+          <div style={{background:"#fff",borderRadius:12,overflow:"hidden",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+            {visible.map((p,pi)=>(
+              <ProdRow key={p.id} p={p}
+                colors={getColors(p.id)} sizes={getSizes(p.id)}
+                salePrice={getPrice(p.id)} customPrice={o.prices[p.id]!=null}
+                showCost={showCost&&canEditCat(user.role)}
+                onPriceChange={v=>setPrice(p.id,v)}
+                onPriceReset={()=>setO(prev=>{const pr={...prev.prices};delete pr[p.id];return{...prev,prices:pr};})}
+                getQty={getQty} setQty={setQty}
+                onAddVariant={()=>setVarModal(p.id)}
+                even={pi%2===0}/>
+            ))}
+          </div>
+        </div>
+
+        <div style={{position:"sticky",top:70}} className="sp">
+          <div style={{background:"#1a1a1a",color:"#f7f4f0",borderRadius:12,padding:"14px 16px",marginBottom:10}}>
+            <div style={{fontSize:10,color:"#a0998f",fontWeight:700,letterSpacing:1.2,marginBottom:2}}>TOTAL DEL PEDIDO</div>
+            <div style={{fontSize:32,fontWeight:700,lineHeight:1.1}}>{fmt(total)}</div>
+            <div style={{fontSize:12,color:"#a0998f",marginTop:2}}>{units} prenda{units!==1?"s":""}</div>
+          </div>
+
+          {summary.length===0?(
+            <div style={{background:"#fff",borderRadius:12,padding:"20px 16px",textAlign:"center",color:"#bbb",fontSize:13,boxShadow:"0 1px 4px rgba(0,0,0,.06)"}}>← Ingresá cantidades</div>
+          ):(
+            <div style={{background:"#fff",borderRadius:12,padding:"12px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.06)",maxHeight:360,overflowY:"auto"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#aaa",letterSpacing:1.2,marginBottom:10}}>RESUMEN POR ARTÍCULO</div>
+              {summary.map((item,i)=>(
+                <div key={i} style={{marginBottom:12,paddingBottom:i<summary.length-1?12:0,borderBottom:i<summary.length-1?"1px solid #f5f2ee":"none"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}>
+                    <span style={{fontSize:13,fontWeight:700,flex:1,paddingRight:8,lineHeight:1.3}}>{item.name}</span>
+                    <span style={{fontSize:13,fontWeight:700,whiteSpace:"nowrap"}}>{fmt(item.total)}</span>
+                  </div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+                    {item.rows.map((r,j)=>(
+                      <span key={j} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:11,background:"#f5f2ee",padding:"3px 8px",borderRadius:8,color:"#444"}}>
+                        {r.c&&<span style={{width:8,height:8,borderRadius:"50%",background:COLOR_HEX[r.c]||"#ccc",border:"1px solid rgba(0,0,0,.15)",display:"inline-block",flexShrink:0}}/>}
+                        {r.c&&<span>{r.c}</span>}
+                        <span style={{fontWeight:700}}>{r.s}</span>
+                        <span style={{color:"#999"}}>×{r.q}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:10}}>
+            <button onClick={()=>onSave({...o,extraColors,extraSizes})} style={{padding:13,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,cursor:"pointer"}}>💾 Guardar pedido</button>
+            <button onClick={onCancel} style={{padding:11,background:"#f0ede8",color:"#333",border:"none",borderRadius:10,fontSize:14,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── PROD ROW ──────────────────────────────────────────────────────
+function ProdRow({p,colors,sizes,salePrice,customPrice,showCost,onPriceChange,onPriceReset,getQty,setQty,onAddVariant,even}){
+  const [open,setOpen]=useState(false);
+  const [editP,setEditP]=useState(false);
+  const [tmpP,setTmpP]=useState("");
+  const allColors=colors.length>0?colors:[""];
+  const totalUnits=useMemo(()=>allColors.reduce((s,c)=>s+sizes.reduce((ss,sz)=>ss+getQty(p.id,c,sz),0),0),[allColors,sizes,getQty,p.id]);
+  const margin=p.costPrice>0?((salePrice-p.costPrice)/p.costPrice*100).toFixed(0):null;
+  return(
+    <div style={{borderBottom:"1px solid #f0ede8"}}>
+      <div onClick={()=>setOpen(v=>!v)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"11px 14px",cursor:"pointer",background:even?"#fff":"#faf9f7",userSelect:"none"}}>
+        <div style={{flex:1,minWidth:0,paddingRight:8}}>
+          <span style={{fontWeight:600,fontSize:14}}>{p.name}</span>
+          {p.preorder&&<span style={{fontSize:10,background:"#e8f0ff",color:"#3355aa",padding:"1px 6px",borderRadius:8,marginLeft:6,fontWeight:700}}>📦</span>}
+          {customPrice&&<span style={{fontSize:10,background:"#f5e8d0",color:"#8a5a1a",padding:"1px 6px",borderRadius:8,marginLeft:4,fontWeight:600}}>editado</span>}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+          {totalUnits>0&&<span style={{background:"#1a1a1a",color:"#fff",borderRadius:20,padding:"2px 9px",fontSize:11,fontWeight:700}}>{totalUnits} ud.</span>}
+          <span style={{color:"#ccc",fontSize:11}}>{open?"▲":"▼"}</span>
+        </div>
+      </div>
+      {open&&(
+        <div style={{padding:"4px 14px 14px",background:even?"#fff":"#faf9f7",overflowX:"auto"}}>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,padding:"8px 10px",background:"#f5f2ee",borderRadius:8,flexWrap:"wrap"}}>
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,color:"#888",fontWeight:700,letterSpacing:.5}}>PRECIO VENTA</div>
+              {editP?(
+                <div style={{display:"flex",gap:6,alignItems:"center",marginTop:3}}>
+                  <input type="number" value={tmpP} onChange={e=>setTmpP(e.target.value)} autoFocus
+                    onKeyDown={e=>e.key==="Enter"&&(onPriceChange(tmpP),setEditP(false))}
+                    style={{width:100,padding:"5px 8px",border:"2px solid #1a1a1a",borderRadius:6,fontSize:14,fontWeight:700}}/>
+                  <button onClick={()=>{onPriceChange(tmpP);setEditP(false);}} style={{padding:"5px 10px",background:"#1a1a1a",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12,fontWeight:700}}>✓</button>
+                  <button onClick={()=>setEditP(false)} style={{padding:"5px 8px",background:"#ece9e4",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}}>✗</button>
+                </div>
+              ):(
+                <div style={{display:"flex",alignItems:"center",gap:8,marginTop:3,flexWrap:"wrap"}}>
+                  <span style={{fontSize:18,fontWeight:700}}>{fmt(salePrice)}</span>
+                  <button onClick={e=>{e.stopPropagation();setTmpP(String(salePrice));setEditP(true);}} style={{fontSize:11,color:"#c19a6b",background:"none",border:"1px solid #c19a6b",padding:"3px 8px",borderRadius:6,cursor:"pointer",fontWeight:600}}>✏️ Editar</button>
+                  {customPrice&&<button onClick={e=>{e.stopPropagation();onPriceReset();}} style={{fontSize:11,color:"#888",background:"none",border:"1px solid #ddd",padding:"3px 8px",borderRadius:6,cursor:"pointer"}}>↩ Reset</button>}
+                </div>
+              )}
+            </div>
+            {showCost&&p.costPrice>0&&(
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:10,color:"#888",fontWeight:700}}>COSTO</div>
+                <div style={{fontSize:14,fontWeight:700,color:"#555"}}>{fmt(p.costPrice)}</div>
+                {margin&&<div style={{fontSize:11,color:"#2d7a4f",fontWeight:700}}>+{margin}%</div>}
+              </div>
+            )}
+          </div>
+          <table style={{borderCollapse:"collapse",width:"100%",minWidth:260}}>
+            <thead>
+              <tr>
+                {colors.length>0&&<th style={{textAlign:"left",padding:"4px 8px 4px 0",color:"#999",fontSize:11,fontWeight:700}}>COLOR</th>}
+                {sizes.map(s=><th key={s} style={{padding:"4px 4px",color:"#555",fontSize:12,fontWeight:700,textAlign:"center",minWidth:46}}>{s}</th>)}
+                <th style={{padding:"4px 0 4px 6px",color:"#aaa",fontSize:10,fontWeight:600,textAlign:"right",minWidth:58}}>SUBTOT.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allColors.map(c=>{
+                const rowU=sizes.reduce((s,sz)=>s+getQty(p.id,c,sz),0);
+                return(
+                  <tr key={c||"_"} style={{borderTop:"1px solid #f0ede8"}}>
+                    {colors.length>0&&(
+                      <td style={{padding:"4px 8px 4px 0",verticalAlign:"middle"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:5}}>
+                          <span style={{width:10,height:10,borderRadius:"50%",background:COLOR_HEX[c]||"#ccc",border:"1px solid rgba(0,0,0,.15)",flexShrink:0,display:"inline-block"}}/>
+                          <span style={{fontSize:12,color:"#444",whiteSpace:"nowrap"}}>{c}</span>
+                        </div>
+                      </td>
+                    )}
+                    {sizes.map(s=>(
+                      <td key={s} style={{padding:"3px 2px",textAlign:"center",verticalAlign:"middle"}}>
+                        <QCell qty={getQty(p.id,c,s)} onChange={v=>setQty(p.id,c,s,v)}/>
+                      </td>
+                    ))}
+                    <td style={{padding:"3px 0 3px 6px",textAlign:"right",verticalAlign:"middle",whiteSpace:"nowrap"}}>
+                      <span style={{fontSize:12,fontWeight:rowU>0?700:400,color:rowU>0?"#1a1a1a":"#ccc"}}>{rowU>0?fmt(salePrice*rowU):"—"}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <button onClick={e=>{e.stopPropagation();onAddVariant();}} style={{marginTop:10,fontSize:12,color:"#3355aa",background:"none",border:"1px dashed #3355aa",padding:"5px 12px",borderRadius:8,cursor:"pointer",fontWeight:600,width:"100%"}}>
+            + Agregar color o talle
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── VARIANT MODAL ─────────────────────────────────────────────────
+function VariantModal({pid,prodName,onAdd,onClose}){
+  const [color,setColor]=useState("");
+  const [size,setSize]=useState("");
+  return(
+    <div className="ov" onClick={onClose}>
+      <div className="md" onClick={e=>e.stopPropagation()}>
+        <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:20,marginBottom:4}}>Agregar variante</h3>
+        <p style={{fontSize:13,color:"#888",marginBottom:18}}>{prodName}</p>
+        <Fld label="Nuevo color (opcional)" val={color} set={setColor} ph="Ej: Tiza, Nude, Verde agua"/>
+        <Fld label="Nuevo talle (opcional)"  val={size}  set={setSize}  ph="Ej: XXL, 48, Oversize"/>
+        <p style={{fontSize:11,color:"#bbb",marginBottom:14}}>Podés agregar color, talle, o ambos a la vez.</p>
+        <div style={{display:"flex",gap:8}}>
+          <Btn primary onClick={()=>{if(!color&&!size)return;onAdd(pid,color.trim()||null,size.trim()||null);}}>Agregar</Btn>
+          <Btn onClick={onClose}>Cancelar</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── QTY CELL ──────────────────────────────────────────────────────
+function QCell({qty,onChange}){
+  const [editing,setEditing]=useState(false);
+  const [tmp,setTmp]=useState("");
+  if(editing)return(
+    <input type="number" min="0" value={tmp} onChange={e=>setTmp(e.target.value)} autoFocus
+      onBlur={()=>{onChange(Math.max(0,parseInt(tmp)||0));setEditing(false);}}
+      onKeyDown={e=>{if(e.key==="Enter"||e.key==="Tab"){onChange(Math.max(0,parseInt(tmp)||0));setEditing(false);}}}
+      style={{width:40,height:30,textAlign:"center",border:"2px solid #1a1a1a",borderRadius:6,fontSize:14,fontWeight:700,padding:0}}/>
+  );
+  const a=qty>0;
+  return(
+    <div style={{display:"inline-flex",alignItems:"center",border:`1px solid ${a?"#b8a99a":"#e0dcd6"}`,borderRadius:8,overflow:"hidden",background:a?"#f5ede0":"#fff"}}>
+      <button onClick={()=>onChange(Math.max(0,qty-1))} style={{width:22,height:30,border:"none",background:"transparent",cursor:"pointer",fontSize:14,color:a?"#5c3317":"#bbb",display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
+      <span onClick={()=>{setTmp(String(qty));setEditing(true);}} style={{minWidth:22,height:30,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:a?700:400,fontSize:12,color:a?"#1a1a1a":"#ccc",cursor:"text",userSelect:"none"}}>{a?qty:"·"}</span>
+      <button onClick={()=>onChange(qty+1)} style={{width:22,height:30,border:"none",background:a?"#5c3317":"transparent",cursor:"pointer",fontSize:14,color:a?"#fff":"#bbb",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+    </div>
+  );
+}
+
+// ── AGENDA ────────────────────────────────────────────────────────
+function Agenda({user,appts,saveAppts}){
+  const [showForm,setShowForm]=useState(false);
+  const [form,setForm]=useState({date:"",time:"",clientName:"",address:"",notes:""});
+  const [editId,setEditId]=useState(null);
+  const today=new Date().toISOString().split("T")[0];
+  const mine=useMemo(()=>canSeeAll(user.role)?appts:appts.filter(a=>a.userId===user.id),[appts,user]);
+  const upcoming=useMemo(()=>[...mine].filter(a=>a.date>=today).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)),[mine,today]);
+  const past=useMemo(()=>[...mine].filter(a=>a.date<today).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)),[mine,today]);
+  const save=()=>{
+    if(!form.date||!form.clientName)return;
+    if(editId)saveAppts(p=>p.map(a=>a.id===editId?{...form,id:editId,userId:user.id,userName:user.name}:a));
+    else saveAppts(p=>[...p,{...form,id:Date.now(),userId:user.id,userName:user.name}]);
+    setForm({date:"",time:"",clientName:"",address:"",notes:""});setShowForm(false);setEditId(null);
+  };
+  return(
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700}}>Agenda</h2>
+        <Btn primary onClick={()=>{setShowForm(v=>!v);setEditId(null);setForm({date:"",time:"",clientName:"",address:"",notes:""});}}>+ Nueva cita</Btn>
+      </div>
+      {showForm&&(
+        <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:20,border:"2px solid #1a1a1a",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <h3 style={{margin:"0 0 14px",fontSize:15,fontWeight:700}}>{editId?"Editar":"Nueva"} cita</h3>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Fld label="Fecha" type="date" val={form.date} set={v=>setForm(p=>({...p,date:v}))}/>
+            <Fld label="Hora"  type="time" val={form.time} set={v=>setForm(p=>({...p,time:v}))}/>
+          </div>
+          <Fld label="Cliente"   val={form.clientName} set={v=>setForm(p=>({...p,clientName:v}))} ph="Nombre"/>
+          <Fld label="Dirección" val={form.address}    set={v=>setForm(p=>({...p,address:v}))}    ph="Calle, número, ciudad"/>
+          <Fld label="Notas"     val={form.notes}      set={v=>setForm(p=>({...p,notes:v}))}      ph="Observaciones…"/>
+          <div style={{display:"flex",gap:8,marginTop:4}}>
+            <Btn primary onClick={save}>{editId?"Guardar":"Agregar"} cita</Btn>
+            <Btn onClick={()=>{setShowForm(false);setEditId(null);}}>Cancelar</Btn>
+          </div>
+        </div>
+      )}
+      {upcoming.length===0&&past.length===0&&<Empty icon="📅" text="No hay citas agendadas"/>}
+      {upcoming.length>0&&<><SLbl>Próximas</SLbl>{upcoming.map(a=>(
+        <div key={a.id} style={{background:"#fff",borderRadius:12,padding:"12px 16px",marginBottom:10,borderLeft:"4px solid #c19a6b",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+            <div>
+              <div style={{fontWeight:700,fontSize:14,marginBottom:3}}>{a.clientName}</div>
+              <div style={{fontSize:12,color:"#666",display:"flex",flexWrap:"wrap",gap:"3px 12px"}}>
+                <span>📅 {fmtD(a.date)}{a.time?` — ${a.time}hs`:""}</span>
+                {a.address&&<span>📍 {a.address}</span>}
+                {a.notes&&<span>📝 {a.notes}</span>}
+              </div>
+            </div>
+            <div style={{display:"flex",gap:4}}>
+              <IBtn onClick={()=>{setForm({date:a.date,time:a.time||"",clientName:a.clientName,address:a.address||"",notes:a.notes||""});setEditId(a.id);setShowForm(true);}}>✏️</IBtn>
+              <IBtn onClick={()=>saveAppts(p=>p.filter(x=>x.id!==a.id))}>🗑</IBtn>
+            </div>
+          </div>
+        </div>
+      ))}</>}
+      {past.length>0&&<><SLbl style={{marginTop:20}}>Historial</SLbl>{past.slice(0,5).map(a=>(
+        <div key={a.id} style={{background:"#fff",borderRadius:12,padding:"12px 16px",marginBottom:8,borderLeft:"4px solid #e0d8cc",opacity:.65,boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <div style={{fontWeight:600,fontSize:14}}>{a.clientName}</div>
+          <div style={{fontSize:12,color:"#666"}}>{fmtD(a.date)}{a.address?` · ${a.address}`:""}</div>
+        </div>
+      ))}</>}
+    </div>
+  );
+}
+
+// ── CATÁLOGO ──────────────────────────────────────────────────────
+function Catalog({user,prods,saveProds,mult,setMult}){
+  const INIT_IDS=useMemo(()=>new Set(PRODUCTS.map(p=>p.id)),[]);
+  const [editId,setEditId]=useState(null);
+  const [editP,setEditP]=useState({list:0,cost:0});
+  const [search,setSearch]=useState("");
+  const [catF,setCatF]=useState("Todos");
+  const [showPre,setShowPre]=useState(false);
+  const [editMult,setEditMult]=useState(false);
+  const [tmpMult,setTmpMult]=useState(mult);
+  const [showAdd,setShowAdd]=useState(false);
+  const [newP,setNewP]=useState({name:"",category:"Preventa",colors:"",sizes:"",listPrice:"",costPrice:""});
+  const cats=useMemo(()=>["Todos",...Array.from(new Set(prods.map(p=>p.category)))]  ,[prods]);
+  const visible=useMemo(()=>prods.filter(p=>{
+    if(showPre)return p.preorder&&(!search||p.name.toLowerCase().includes(search.toLowerCase()));
+    return(catF==="Todos"||p.category===catF)&&(!search||p.name.toLowerCase().includes(search.toLowerCase()));
+  }),[prods,showPre,catF,search]);
+  const addProd=()=>{
+    if(!newP.name)return;
+    saveProds(prev=>[...prev,{id:Date.now(),name:newP.name.trim(),category:newP.category||"Preventa",colors:newP.colors?newP.colors.split(",").map(c=>c.trim()).filter(Boolean):[],sizes:newP.sizes?newP.sizes.split(",").map(s=>s.trim()).filter(Boolean):[],listPrice:Number(newP.listPrice)||0,costPrice:Number(newP.costPrice)||0}]);
+    setNewP({name:"",category:"Preventa",colors:"",sizes:"",listPrice:"",costPrice:""});setShowAdd(false);
+  };
+  return(
+    <div>
+      <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700,marginBottom:16}}>Catálogo</h2>
+      {canEditCat(user.role)&&(
+        <div style={{background:"#1a1a1a",color:"#f7f4f0",borderRadius:12,padding:"14px 16px",marginBottom:16}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontSize:10,color:"#a0998f",fontWeight:700,letterSpacing:1.2}}>MULTIPLICADOR</div>
+              <div style={{fontSize:30,fontWeight:700,lineHeight:1.2}}>{mult}×</div>
+              <div style={{fontSize:12,color:"#a0998f"}}>Lista × {mult} = precio venta</div>
+            </div>
+            {!editMult?(
+              <Btn onClick={()=>{setTmpMult(mult);setEditMult(true);}} style={{background:"#c19a6b",color:"#fff",border:"none"}}>✏️ Cambiar</Btn>
+            ):(
+              <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                <input type="number" step="0.1" value={tmpMult} onChange={e=>setTmpMult(e.target.value)}
+                  style={{width:68,padding:"7px",border:"1px solid #555",background:"#2a2a2a",color:"#fff",borderRadius:8,fontSize:18,textAlign:"center"}}/>
+                <Btn onClick={()=>{setMult(Number(tmpMult));setEditMult(false);}} style={{background:"#c19a6b",color:"#fff",border:"none"}}>✓</Btn>
+              </div>
+            )}
+          </div>
+          <div style={{marginTop:10,padding:"7px 12px",background:"#2a2a2a",borderRadius:8,fontSize:12,color:"#c8c0b4"}}>
+            $10.000 × {mult} = <strong style={{color:"#c19a6b"}}>{fmt(10000*mult)}</strong>
+          </div>
+        </div>
+      )}
+      <div style={{display:"flex",gap:10,marginBottom:10,alignItems:"center"}}>
+        <input placeholder="🔍 Buscar…" value={search} onChange={e=>setSearch(e.target.value)}
+          style={{flex:1,padding:"10px 14px",border:"1px solid #ddd",borderRadius:8,fontSize:14}}/>
+        {canEditCat(user.role)&&<Btn primary onClick={()=>setShowAdd(v=>!v)}>+ Agregar</Btn>}
+      </div>
+      {showAdd&&canEditCat(user.role)&&(
+        <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:16,border:"2px solid #1a1a1a",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <h3 style={{margin:"0 0 14px",fontSize:15,fontWeight:700}}>Nuevo artículo</h3>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Fld label="Nombre" val={newP.name} set={v=>setNewP(p=>({...p,name:v}))} ph="Ej: Sweater Nuevo"/>
+            <Fld label="Categoría" val={newP.category} set={v=>setNewP(p=>({...p,category:v}))} ph="Preventa"/>
+          </div>
+          <Fld label="Colores (separar con coma)" val={newP.colors} set={v=>setNewP(p=>({...p,colors:v}))} ph="Negro, Beige, Camel"/>
+          <Fld label="Talles (separar con coma)"  val={newP.sizes}  set={v=>setNewP(p=>({...p,sizes:v}))}  ph="S, M, L"/>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Fld label="Precio lista" type="number" val={newP.listPrice}  set={v=>setNewP(p=>({...p,listPrice:v}))}  ph="0"/>
+            <Fld label="Precio costo" type="number" val={newP.costPrice}  set={v=>setNewP(p=>({...p,costPrice:v}))}  ph="0"/>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:4}}>
+            <Btn primary onClick={addProd}>Agregar</Btn>
+            <Btn onClick={()=>setShowAdd(false)}>Cancelar</Btn>
+          </div>
+        </div>
+      )}
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+        {cats.map(c=>(
+          <button key={c} onClick={()=>{setCatF(c);setShowPre(false);}} style={{padding:"5px 11px",borderRadius:20,border:(catF===c&&!showPre)?"none":"1px solid #ddd",background:(catF===c&&!showPre)?"#1a1a1a":"#fff",color:(catF===c&&!showPre)?"#fff":"#555",fontSize:11,cursor:"pointer",fontWeight:600}}>{c}</button>
+        ))}
+        <button onClick={()=>{setShowPre(v=>!v);setCatF("Todos");}} style={{padding:"5px 11px",borderRadius:20,border:showPre?"none":"1px solid #3355aa",background:showPre?"#3355aa":"#fff",color:showPre?"#fff":"#3355aa",fontSize:11,cursor:"pointer",fontWeight:700}}>📦 Por ingresar ({prods.filter(p=>p.preorder).length})</button>
+      </div>
+      {visible.map(p=>{
+        const isEd=editId===p.id;const isCustom=!INIT_IDS.has(p.id);const canEdit=canEditCat(user.role);
+        const sell=p.listPrice*mult;const margin=p.costPrice>0?((sell-p.costPrice)/p.costPrice*100).toFixed(0):null;
+        return(
+          <div key={p.id} style={{background:"#fff",borderRadius:12,padding:"14px 16px",marginBottom:10,boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:3,flexWrap:"wrap"}}>
+                  <span style={{fontWeight:700,fontSize:15}}>{p.name}</span>
+                  {p.preorder&&!isCustom&&<span style={{fontSize:10,background:"#e8f0ff",color:"#3355aa",padding:"2px 7px",borderRadius:8,fontWeight:700}}>📦 POR INGRESAR</span>}
+                  {isCustom&&<span style={{fontSize:10,background:"#d4edda",color:"#1a6b3a",padding:"2px 7px",borderRadius:8,fontWeight:700}}>✨ PREVENTA</span>}
+                </div>
+                <div style={{fontSize:11,color:"#888",marginBottom:6}}>{p.category}</div>
+                {p.colors.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:6}}>{p.colors.map(c=>(
+                  <span key={c} style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:11,color:"#555",background:"#f5f2ee",padding:"2px 7px",borderRadius:10}}>
+                    <span style={{width:8,height:8,borderRadius:"50%",background:COLOR_HEX[c]||"#ccc",border:"1px solid rgba(0,0,0,.1)",display:"inline-block"}}/>{c}
+                  </span>
+                ))}</div>}
+                {p.sizes.length>0&&<div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{p.sizes.map(s=><span key={s} style={{fontSize:11,background:"#f0ede8",padding:"2px 7px",borderRadius:6,fontWeight:600}}>{s}</span>)}</div>}
+              </div>
+              <div style={{textAlign:"right",minWidth:148}}>
+                {isEd&&canEdit?(
+                  <div>
+                    <Fld label="Lista"  type="number" val={editP.list} set={v=>setEditP(p=>({...p,list:v}))}/>
+                    <Fld label="Costo"  type="number" val={editP.cost} set={v=>setEditP(p=>({...p,cost:v}))}/>
+                    <div style={{display:"flex",gap:6,marginTop:4,justifyContent:"flex-end"}}>
+                      <Btn primary small onClick={()=>{saveProds(prev=>prev.map(x=>x.id===p.id?{...x,listPrice:Number(editP.list),costPrice:Number(editP.cost)}:x));setEditId(null);}}>✓ OK</Btn>
+                      <Btn small onClick={()=>setEditId(null)}>✗</Btn>
+                    </div>
+                  </div>
+                ):(
+                  <div>
+                    <div style={{fontSize:12,color:"#888"}}>Lista: {fmt(p.listPrice)}</div>
+                    {canEdit&&p.costPrice>0&&<div style={{fontSize:12,color:"#888"}}>Costo: {fmt(p.costPrice)}</div>}
+                    <div style={{fontSize:20,fontWeight:700}}>{fmt(sell)}</div>
+                    {canEdit&&margin&&<div style={{fontSize:11,color:"#2d7a4f",fontWeight:700}}>+{margin}% margen</div>}
+                    {canEdit&&<div style={{display:"flex",gap:5,marginTop:6,justifyContent:"flex-end",flexWrap:"wrap"}}>
+                      <button onClick={()=>{setEditId(p.id);setEditP({list:p.listPrice,cost:p.costPrice});}} style={{fontSize:12,color:"#c19a6b",background:"none",border:"1px solid #c19a6b",padding:"3px 9px",borderRadius:6,cursor:"pointer",fontWeight:600}}>✏️</button>
+                      {isCustom&&<button onClick={()=>saveProds(prev=>prev.filter(x=>x.id!==p.id))} style={{fontSize:12,color:"#cc4444",background:"none",border:"1px solid #cc4444",padding:"3px 9px",borderRadius:6,cursor:"pointer",fontWeight:600}}>🗑</button>}
+                    </div>}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── USER MGMT ─────────────────────────────────────────────────────
+function UserMgmt({user,users,saveUsers}){
+  const [editId,setEditId]=useState(null);
+  const [form,setForm]=useState({name:"",username:"",password:"",role:"vendedora"});
+  const [showAdd,setShowAdd]=useState(false);
+  const rl={admin:"Admin",encargada:"Encargada",vendedora_full:"Vendedora (ve todos)",vendedora:"Vendedora"};
+  const saveEdit=()=>{
+    if(editId)saveUsers(prev=>prev.map(u=>u.id===editId?{...u,...form}:u));
+    else saveUsers(prev=>[...prev,{...form,id:String(Date.now())}]);
+    setEditId(null);setShowAdd(false);setForm({name:"",username:"",password:"",role:"vendedora"});
+  };
+  return(
+    <div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:24,fontWeight:700}}>Usuarios</h2>
+        <Btn primary onClick={()=>{setShowAdd(true);setEditId(null);setForm({name:"",username:"",password:"",role:"vendedora"});}}>+ Agregar</Btn>
+      </div>
+      {(showAdd||editId)&&(
+        <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:16,border:"2px solid #1a1a1a",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <h3 style={{margin:"0 0 14px",fontSize:15,fontWeight:700}}>{editId?"Editar":"Nuevo"} usuario</h3>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Fld label="Nombre visible" val={form.name}     set={v=>setForm(p=>({...p,name:v}))}     ph="Ej: MARIA"/>
+            <Fld label="Usuario login"  val={form.username} set={v=>setForm(p=>({...p,username:v}))} ph="Ej: maria"/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <Fld label="Contraseña" val={form.password} set={v=>setForm(p=>({...p,password:v}))} ph="Nueva contraseña"/>
+            <div style={{marginBottom:10}}>
+              <label style={{fontSize:12,fontWeight:600,color:"#666",display:"block",marginBottom:3}}>Rol</label>
+              <select value={form.role} onChange={e=>setForm(p=>({...p,role:e.target.value}))}
+                style={{width:"100%",padding:"8px 11px",border:"1px solid #ddd",borderRadius:8,fontSize:14}}>
+                {Object.entries(rl).map(([v,l])=><option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:4}}>
+            <Btn primary onClick={saveEdit}>{editId?"Guardar":"Crear"}</Btn>
+            <Btn onClick={()=>{setShowAdd(false);setEditId(null);}}>Cancelar</Btn>
+          </div>
+        </div>
+      )}
+      {users.map(u=>(
+        <div key={u.id} style={{background:"#fff",borderRadius:12,padding:"14px 16px",marginBottom:10,boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontWeight:700,fontSize:15}}>{u.name}</span>
+                <span style={{fontSize:10,background:ROLE_COLOR[u.role],color:"#fff",padding:"2px 8px",borderRadius:10,fontWeight:700}}>{rl[u.role]}</span>
+              </div>
+              <div style={{fontSize:12,color:"#888",marginTop:2}}>@{u.username}</div>
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={()=>{setEditId(u.id);setShowAdd(false);setForm({name:u.name,username:u.username,password:u.password,role:u.role});}} style={{fontSize:12,color:"#c19a6b",background:"none",border:"1px solid #c19a6b",padding:"4px 10px",borderRadius:6,cursor:"pointer",fontWeight:600}}>✏️</button>
+              {u.id!==user.id&&<button onClick={()=>{if(confirm(`¿Eliminar a ${u.name}?`))saveUsers(prev=>prev.filter(x=>x.id!==u.id));}} style={{fontSize:12,color:"#cc4444",background:"none",border:"1px solid #cc4444",padding:"4px 10px",borderRadius:6,cursor:"pointer",fontWeight:600}}>🗑</button>}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── PRIMITIVOS ────────────────────────────────────────────────────
+function Fld({label,val,set,type="text",ph,onEnter}){
+  return(
+    <div style={{marginBottom:10}}>
+      <label style={{fontSize:12,fontWeight:700,color:"#666",display:"block",marginBottom:4,letterSpacing:.5}}>{label}</label>
+      <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={ph}
+        onKeyDown={e=>e.key==="Enter"&&onEnter&&onEnter()}
+        style={{width:"100%",padding:"9px 12px",border:"1px solid #ddd",borderRadius:8,fontSize:14,boxSizing:"border-box"}}/>
+    </div>
+  );
+}
+function Btn({children,onClick,primary,small,style={}}){
+  return<button onClick={onClick} style={{padding:small?"5px 12px":primary?"11px 18px":"10px 18px",background:primary?"#1a1a1a":"#f0ede8",color:primary?"#fff":"#333",border:"none",borderRadius:8,fontSize:small?12:14,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",...style}}>{children}</button>;
+}
+const IBtn=({children,onClick})=><button onClick={e=>{e.stopPropagation();onClick();}} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,padding:"2px 4px"}}>{children}</button>;
+const SCard=({label,val,dark})=>(
+  <div style={{background:dark?"#1a1a1a":"#fff",color:dark?"#f7f4f0":"#1a1a1a",borderRadius:12,padding:"12px 16px",boxShadow:"0 1px 3px rgba(0,0,0,.07)"}}>
+    <div style={{fontSize:10,fontWeight:700,color:dark?"#a0998f":"#888",marginBottom:3,textTransform:"uppercase",letterSpacing:1}}>{label}</div>
+    <div style={{fontSize:20,fontWeight:700}}>{val}</div>
+  </div>
+);
+const SBadge=({status})=>{
+  const m={borrador:["#f5f0e8","#8a6d3b"],confirmado:["#e8f5ee","#2d7a4f"],entregado:["#e8e8e8","#555"]};
+  const l={borrador:"Borrador",confirmado:"Confirmado",entregado:"Entregado"};
+  const [bg,col]=m[status]||m.borrador;
+  return<span style={{fontSize:10,background:bg,color:col,padding:"2px 7px",borderRadius:8,fontWeight:700}}>{l[status]||status}</span>;
+};
+const SLbl=({children,style={}})=><div style={{fontSize:10,fontWeight:700,color:"#888",letterSpacing:1.5,textTransform:"uppercase",marginBottom:8,...style}}>{children}</div>;
+const Empty=({icon,text})=>(
+  <div style={{textAlign:"center",padding:"48px 24px",color:"#bbb"}}>
+    <div style={{fontSize:44,marginBottom:10}}>{icon}</div>
+    <div style={{fontSize:14}}>{text}</div>
+  </div>
+);
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
