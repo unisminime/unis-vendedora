@@ -124,8 +124,6 @@ function App(){
   const [user,setUser]=useState(()=>lsGet("unis_sess",null));
   const [users,setUsers]=useState(()=>lsGet("unis_users",DFLT_USERS));
   const [orders,setOrdersState]=useState([]);
-  // safety: always keep orders as array
-  const safeOrders=Array.isArray(orders)?orders:[];
   const [prods,setProdsState]=useState(()=>lsGet("unis_prods",PRODUCTS));
   const [appts,setApptsState]=useState(()=>lsGet("unis_appts",[]));
   const [mult,setMultState]=useState(()=>lsGet("unis_mult",1));
@@ -265,7 +263,7 @@ function Main({user,users,orders,prods,appts,mult,saveOrders,saveUsers,saveProds
         </div>
       </header>
       <main style={{maxWidth:1020,margin:"0 auto",padding:"20px 12px 80px"}}>
-        {tab==="pedidos"  &&<Orders  user={user} orders={safeOrders} saveOrders={saveOrders} prods={prods} mult={mult}/>}
+        {tab==="pedidos"  &&<Orders  user={user} orders={Array.isArray(orders)?orders:[]} saveOrders={saveOrders} prods={prods} mult={mult}/>}
         {tab==="agenda"   &&<Agenda  user={user} appts={appts}   saveAppts={saveAppts}/>}
         {tab==="catalogo" &&<Catalog user={user} prods={prods}   saveProds={saveProds}  mult={mult} setMult={setMult}/>}
         {tab==="usuarios" &&<UserMgmt user={user} users={users}  saveUsers={saveUsers}/>}
