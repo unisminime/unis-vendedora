@@ -85,13 +85,20 @@ const lsGet=(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
 async function stGet(key){
-  try{const r=await window.storage.get(key,true);return r?JSON.parse(r.value):null;}
-  catch{return lsGet(key,null);}
+  try{
+    if(window.storage){
+      const r=await window.storage.get(key,true);
+      if(r)return JSON.parse(r.value);
+    }
+  }catch{}
+  return lsGet(key,null);
 }
 async function stSet(key,val){
-  const s=JSON.stringify(val);
-  try{await window.storage.set(key,s,true);}catch{}
-  lsSet(key,s);
+  try{
+    const s=JSON.stringify(val);
+    try{if(window.storage)await window.storage.set(key,s,true);}catch{}
+    lsSet(key,s);
+  }catch(e){console.warn("stSet error:",e);}
 }
 
 function effPrice(pid,prices,prods,mult){
@@ -119,15 +126,18 @@ function App(){
   const [lastSync,setLastSync]=useState(null);
 
   useEffect(()=>{
-    stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);});
-    stGet("unis_users_v3").then(u=>{if(u){setUsers(u);lsSet("unis_users",u);}});
-    stGet("unis_prods_v3").then(p=>{if(p){setProdsState(p);lsSet("unis_prods",p);}});
+    stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);}).catch(()=>{});
+    stGet("unis_users_v3").then(u=>{if(u){setUsers(u);lsSet("unis_users",u);}}).catch(()=>{});
+    stGet("unis_prods_v3").then(p=>{if(p){setProdsState(p);lsSet("unis_prods",p);}}).catch(()=>{});
   },[]);
 
   useEffect(()=>{
     const iv=setInterval(async()=>{
-      const o=await stGet("unis_orders_v3");
-      if(o){setOrdersState(o);setLastSync(new Date());}
+      try{
+        const o=await stGet("unis_orders_v3");
+        if(o)setOrdersState(o);
+        setLastSync(new Date());
+      }catch(e){console.warn("poll error",e);}
     },8000);
     return()=>clearInterval(iv);
   },[]);
@@ -135,8 +145,10 @@ function App(){
   const saveOrders=useCallback((fn)=>{
     setOrdersState(prev=>{
       const next=typeof fn==="function"?fn(prev):fn;
-      setSyncing(true);
-      stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());});
+      setTimeout(()=>{
+        setSyncing(true);
+        stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());}).catch(()=>setSyncing(false));
+      },0);
       return next;
     });
   },[]);
@@ -235,6 +247,7 @@ function Main({user,users,orders,prods,appts,mult,saveOrders,saveUsers,saveProds
               <span style={{fontSize:10,background:ROLE_COLOR[user.role],color:"#fff",padding:"2px 8px",borderRadius:20,fontWeight:700}}>{user.name}</span>
               {syncing&&<span style={{fontSize:10,color:"#c19a6b"}}>↑ guardando…</span>}
               {lastSync&&!syncing&&<span style={{fontSize:9,color:"#555"}}>✓ {lastSync.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</span>}
+              <button onClick={()=>{stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);setLastSync(new Date());}).catch(()=>{});}} style={{fontSize:10,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:4,padding:"2px 6px",cursor:"pointer"}}>↻</button>
             </div>
             <button onClick={onLogout} style={{fontSize:11,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:6,padding:"4px 10px",cursor:"pointer"}}>Salir</button>
           </div>
@@ -280,7 +293,12 @@ function Orders({user,orders,saveOrders,prods,mult}){
     if(!canEditAll(user.role)&&o.userId!==user.id)return;
     setCurrent(JSON.parse(JSON.stringify(o)));setView("form");
   };
-  const saveOrder=o=>{saveOrders(prev=>{const i=prev.findIndex(x=>x.id===o.id);return i>=0?prev.map(x=>x.id===o.id?o:x):[...prev,o];});setView("list");};
+  const saveOrder=o=>{
+    try{
+      saveOrders(prev=>{const i=prev.findIndex(x=>x.id===o.id);return i>=0?prev.map(x=>x.id===o.id?o:x):[...prev,o];});
+      setView("list");
+    }catch(e){console.error("saveOrder error:",e);}
+  };
   const delOrder=id=>saveOrders(prev=>prev.filter(o=>o.id!==id));
 
   if(view==="form")return<OrderForm order={current} prods={prods} mult={mult} user={user} onSave={saveOrder} onCancel={()=>setView("list")}/>;
@@ -482,7 +500,7 @@ function OrderForm({order,prods,mult,user,onSave,onCancel}){
           )}
 
           <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:10}}>
-            <button onClick={()=>onSave({...o,extraColors,extraSizes})} style={{padding:13,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,cursor:"pointer"}}>💾 Guardar pedido</button>
+            <button onClick={()=>{try{onSave({...o,extraColors,extraSizes});}catch(e){alert("Error al guardar. Intentá de nuevo.");}}} style={{padding:13,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,fontSize:15,fontWeight:700,cursor:"pointer"}}>💾 Guardar pedido</button>
             <button onClick={onCancel} style={{padding:11,background:"#f0ede8",color:"#333",border:"none",borderRadius:10,fontSize:14,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
           </div>
         </div>
@@ -916,7 +934,23 @@ const Empty=({icon,text})=>(
   </div>
 );
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+class ErrorBoundary extends React.Component{
+  constructor(p){super(p);this.state={err:null};}
+  static getDerivedStateFromError(e){return{err:e};}
+  componentDidCatch(e,info){console.error("App error:",e,info);}
+  render(){
+    if(this.state.err)return(
+      <div style={{padding:32,textAlign:"center",fontFamily:"sans-serif"}}>
+        <div style={{fontSize:32,marginBottom:16}}>⚠️</div>
+        <div style={{fontSize:18,fontWeight:600,marginBottom:8}}>Algo salió mal</div>
+        <div style={{fontSize:13,color:"#888",marginBottom:24}}>{String(this.state.err)}</div>
+        <button onClick={()=>{this.setState({err:null});}} style={{padding:"10px 20px",background:"#1a1a1a",color:"#fff",border:"none",borderRadius:8,fontSize:14,cursor:"pointer"}}>Reintentar</button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<ErrorBoundary><App/></ErrorBoundary>);
 </script>
 </body>
 </html>
