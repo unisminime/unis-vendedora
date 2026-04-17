@@ -281,12 +281,14 @@ function Orders({user,orders,saveOrders,prods,mult}){
   const [search,setSearch]=useState("");
   const [filterStatus,setFilterStatus]=useState("todos");
 
-  const myOrders=useMemo(()=>canSeeAll(user.role)?orders:orders.filter(o=>o.userId===user.id),[orders,user]);
-  const filtered=useMemo(()=>myOrders
-    .filter(o=>filterStatus==="todos"||o.status===filterStatus)
-    .filter(o=>!search||o.clientName?.toLowerCase().includes(search.toLowerCase())||o.trip?.toLowerCase().includes(search.toLowerCase()))
-    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))
-  ,[myOrders,filterStatus,search]);
+  const myOrders=useMemo(()=>{const safe=Array.isArray(orders)?orders:[];return canSeeAll(user.role)?safe:safe.filter(o=>o.userId===user.id);},[orders,user]);
+  const filtered=useMemo(()=>{
+    const safe=Array.isArray(myOrders)?myOrders:[];
+    return safe
+      .filter(o=>filterStatus==="todos"||o.status===filterStatus)
+      .filter(o=>!search||o.clientName?.toLowerCase().includes(search.toLowerCase())||o.trip?.toLowerCase().includes(search.toLowerCase()))
+      .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  },[myOrders,filterStatus,search]);
 
   const totalVenta=useMemo(()=>myOrders.reduce((s,o)=>s+orderTotal(o,prods,mult),0),[myOrders,prods,mult]);
   const pendiente=useMemo(()=>myOrders.filter(o=>o.status!=="entregado").reduce((s,o)=>s+orderTotal(o,prods,mult),0),[myOrders,prods,mult]);
