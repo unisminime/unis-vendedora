@@ -84,21 +84,26 @@ const fmtD=d=>{try{return new Date(d+"T12:00").toLocaleDateString("es-AR",{weekd
 const lsGet=(k,fb)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
+const SB_URL="https://qeqhrbleatfbkmxbmtnk.supabase.co";
+const SB_KEY="sb_publishable_eY2ZZrVG7_r9pNxMtoR7ew_uYP7uoQ7";
+const SB_HDR={"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"};
+
 async function stGet(key){
   try{
-    if(window.storage){
-      const r=await window.storage.get(key,true);
-      if(r)return JSON.parse(r.value);
-    }
-  }catch{}
+    const r=await fetch(SB_URL+"/rest/v1/pedidos?id=eq."+key+"&select=data",{headers:SB_HDR});
+    if(r.ok){const rows=await r.json();if(rows&&rows.length>0)return JSON.parse(rows[0].data);}
+  }catch(e){console.warn("stGet:",e);}
   return lsGet(key,null);
 }
 async function stSet(key,val){
   try{
     const s=JSON.stringify(val);
-    try{if(window.storage)await window.storage.set(key,s,true);}catch{}
     lsSet(key,s);
-  }catch(e){console.warn("stSet error:",e);}
+    const patch=await fetch(SB_URL+"/rest/v1/pedidos?id=eq."+key,{method:"PATCH",headers:{...SB_HDR,"Prefer":"return=minimal"},body:JSON.stringify({data:s,updated_at:new Date().toISOString()})});
+    if(patch.status===404||patch.status===0){
+      await fetch(SB_URL+"/rest/v1/pedidos",{method:"POST",headers:{...SB_HDR,"Prefer":"return=minimal"},body:JSON.stringify({id:key,data:s})});
+    }
+  }catch(e){console.warn("stSet:",e);}
 }
 
 function effPrice(pid,prices,prods,mult){
@@ -133,11 +138,8 @@ function App(){
 
   useEffect(()=>{
     const iv=setInterval(async()=>{
-      try{
-        const o=await stGet("unis_orders_v3");
-        if(o)setOrdersState(o);
-        setLastSync(new Date());
-      }catch(e){console.warn("poll error",e);}
+      const o=await stGet("unis_orders_v3");
+      if(o){setOrdersState(o);setLastSync(new Date());}
     },8000);
     return()=>clearInterval(iv);
   },[]);
@@ -145,10 +147,8 @@ function App(){
   const saveOrders=useCallback((fn)=>{
     setOrdersState(prev=>{
       const next=typeof fn==="function"?fn(prev):fn;
-      setTimeout(()=>{
-        setSyncing(true);
-        stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());}).catch(()=>setSyncing(false));
-      },0);
+      setSyncing(true);
+      stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());});
       return next;
     });
   },[]);
