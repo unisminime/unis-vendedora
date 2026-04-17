@@ -124,6 +124,8 @@ function App(){
   const [user,setUser]=useState(()=>lsGet("unis_sess",null));
   const [users,setUsers]=useState(()=>lsGet("unis_users",DFLT_USERS));
   const [orders,setOrdersState]=useState([]);
+  // safety: always keep orders as array
+  const safeOrders=Array.isArray(orders)?orders:[];
   const [prods,setProdsState]=useState(()=>lsGet("unis_prods",PRODUCTS));
   const [appts,setApptsState]=useState(()=>lsGet("unis_appts",[]));
   const [mult,setMultState]=useState(()=>lsGet("unis_mult",1));
@@ -131,7 +133,7 @@ function App(){
   const [lastSync,setLastSync]=useState(null);
 
   useEffect(()=>{
-    stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);}).catch(()=>{});
+    stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(Array.isArray(o)?o:[]);}).catch(()=>{});
     stGet("unis_users_v3").then(u=>{if(u){setUsers(u);lsSet("unis_users",u);}}).catch(()=>{});
     stGet("unis_prods_v3").then(p=>{if(p){setProdsState(p);lsSet("unis_prods",p);}}).catch(()=>{});
   },[]);
@@ -146,10 +148,14 @@ function App(){
 
   const saveOrders=useCallback((fn)=>{
     setOrdersState(prev=>{
-      const next=typeof fn==="function"?fn(prev):fn;
-      setSyncing(true);
-      stSet("unis_orders_v3",next).then(()=>{setSyncing(false);setLastSync(new Date());});
-      return next;
+      const safePrev=Array.isArray(prev)?prev:[];
+      const next=typeof fn==="function"?fn(safePrev):fn;
+      const safeNext=Array.isArray(next)?next:[];
+      setTimeout(()=>{
+        setSyncing(true);
+        stSet("unis_orders_v3",safeNext).then(()=>{setSyncing(false);setLastSync(new Date());}).catch(()=>setSyncing(false));
+      },0);
+      return safeNext;
     });
   },[]);
 
@@ -247,7 +253,7 @@ function Main({user,users,orders,prods,appts,mult,saveOrders,saveUsers,saveProds
               <span style={{fontSize:10,background:ROLE_COLOR[user.role],color:"#fff",padding:"2px 8px",borderRadius:20,fontWeight:700}}>{user.name}</span>
               {syncing&&<span style={{fontSize:10,color:"#c19a6b"}}>↑ guardando…</span>}
               {lastSync&&!syncing&&<span style={{fontSize:9,color:"#555"}}>✓ {lastSync.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"})}</span>}
-              <button onClick={()=>{stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(o);setLastSync(new Date());}).catch(()=>{});}} style={{fontSize:10,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:4,padding:"2px 6px",cursor:"pointer"}}>↻</button>
+              <button onClick={()=>{stGet("unis_orders_v3").then(o=>{if(o)setOrdersState(Array.isArray(o)?o:[]);setLastSync(new Date());}).catch(()=>{});}} style={{fontSize:10,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:4,padding:"2px 6px",cursor:"pointer"}}>↻</button>
             </div>
             <button onClick={onLogout} style={{fontSize:11,color:"#a0998f",background:"none",border:"1px solid #333",borderRadius:6,padding:"4px 10px",cursor:"pointer"}}>Salir</button>
           </div>
@@ -259,7 +265,7 @@ function Main({user,users,orders,prods,appts,mult,saveOrders,saveUsers,saveProds
         </div>
       </header>
       <main style={{maxWidth:1020,margin:"0 auto",padding:"20px 12px 80px"}}>
-        {tab==="pedidos"  &&<Orders  user={user} orders={orders} saveOrders={saveOrders} prods={prods} mult={mult}/>}
+        {tab==="pedidos"  &&<Orders  user={user} orders={safeOrders} saveOrders={saveOrders} prods={prods} mult={mult}/>}
         {tab==="agenda"   &&<Agenda  user={user} appts={appts}   saveAppts={saveAppts}/>}
         {tab==="catalogo" &&<Catalog user={user} prods={prods}   saveProds={saveProds}  mult={mult} setMult={setMult}/>}
         {tab==="usuarios" &&<UserMgmt user={user} users={users}  saveUsers={saveUsers}/>}
